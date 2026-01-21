@@ -1,0 +1,266 @@
+<div class="form-container">
+  <h1>Reserva de Viaje</h1>
+  
+  <form [formGroup]="reservaFormGroup" (ngSubmit)="onSubmit()">
+    
+    <!-- Sección de Datos del Cliente -->
+    <section class="form-section">
+      <h2>Datos del Cliente</h2>
+      
+      <div class="form-group">
+        <label for="nombrecompleto">Nombre Completo</label>
+        <input 
+          type="text" 
+          id="nombrecompleto" 
+          formControlName="nombrecompleto"
+          [class.error]="isFieldValid('nombrecompleto')"
+          [class.valid]="isFieldValidAndTouched('nombrecompleto')"
+        >
+        @if (isFieldValid('nombrecompleto')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('nombrecompleto') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="dni">DNI/NIE</label>
+        <input 
+          type="text" 
+          id="dni" 
+          formControlName="dni"
+          placeholder="12345678A o X1234567A"
+          [class.error]="isFieldValid('dni')"
+          [class.valid]="isFieldValidAndTouched('dni')"
+        >
+        @if (isFieldValid('dni')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('dni') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email"
+          [class.error]="isFieldValid('email')"
+          [class.valid]="isFieldValidAndTouched('email')"
+        >
+        @if (isFieldValid('email')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('email') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="telefono">Teléfono</label>
+        <input 
+          type="tel" 
+          id="telefono" 
+          formControlName="telefono"
+          placeholder="612345678, tiene que empezar por 6,7 o 9"
+          [class.error]="isFieldValid('telefono')"
+          [class.valid]="isFieldValidAndTouched('telefono')"
+        >
+        @if (isFieldValid('telefono')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('telefono') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="fnacimiento">Fecha de Nacimiento</label>
+        <input 
+          type="date" 
+          id="fnacimiento" 
+          formControlName="fnacimiento"
+          [class.error]="isFieldValid('fnacimiento')"
+          [class.valid]="isFieldValidAndTouched('fnacimiento')"
+        >
+        @if (isFieldValid('fnacimiento')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('fnacimiento') }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Sección de Datos del Viaje -->
+    <section class="form-section">
+      <h2>Datos del Viaje</h2>
+      
+      <div class="form-group">
+        <label for="searchDestino">Buscar Destino</label>
+        <input 
+          type="text" 
+          id="searchDestino" 
+          [formControl]="searchControl"
+          placeholder="Escribe para buscar..."
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="destino">Destino</label>
+        <select 
+          id="destino" 
+          formControlName="destino"
+          [class.error]="isFieldValid('destino')"
+          [class.valid]="isFieldValidAndTouched('destino')"
+        >
+          <option value="" disabled>Selecciona un destino</option>
+          @for (destino of filteredDestinos; track destino) {
+            <option [value]="destino">{{ destino }}</option>
+          }
+        </select>
+        @if (isFieldValid('destino')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('destino') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="fechaSalida">Fecha de Salida</label>
+        <input 
+          type="date" 
+          id="fechaSalida" 
+          formControlName="fechaSalida"
+          [class.error]="isFieldValid('fechaSalida')"
+          [class.valid]="isFieldValidAndTouched('fechaSalida')"
+        >
+        @if (isFieldValid('fechaSalida')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('fechaSalida') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="fechaRegreso">Fecha de Regreso</label>
+        <input 
+          type="date" 
+          id="fechaRegreso" 
+          formControlName="fechaRegreso"
+          [class.error]="isFieldValid('fechaRegreso')"
+          [class.valid]="isFieldValidAndTouched('fechaRegreso')"
+        >
+        @if (isFieldValid('fechaRegreso')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('fechaRegreso') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Viaje</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input 
+              type="radio" 
+              formControlName="tipoViaje"
+              value="Solo ida"
+            >
+            <span>Solo ida</span>
+          </label>
+          <label class="radio-label">
+            <input 
+              type="radio" 
+              formControlName="tipoViaje"
+              value="Ida y vuelta"
+            >
+            <span>Ida y vuelta</span>
+          </label>
+        </div>
+        @if (isFieldValid('tipoViaje')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('tipoViaje') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="clase">Clase</label>
+        <select 
+          id="clase" 
+          formControlName="clase"
+          [class.error]="isFieldValid('clase')"
+          [class.valid]="isFieldValidAndTouched('clase')"
+        >
+          <option value="" disabled>Selecciona una clase</option>
+          @for (clase of clases; track clase) {
+            <option [value]="clase">{{ clase }}</option>
+          }
+        </select>
+        @if (isFieldValid('clase')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('clase') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="numeroPersonas">Número de Personas</label>
+        <input 
+          type="number" 
+          id="numeroPersonas" 
+          formControlName="numeroPersonas"
+          min="1"
+          max="10"
+          [class.error]="isFieldValid('numeroPersonas')"
+          [class.valid]="isFieldValidAndTouched('numeroPersonas')"
+        >
+        @if (isFieldValid('numeroPersonas')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('numeroPersonas') }}</span>
+          </div>
+        }
+      </div>
+    </section>
+    
+    <section class="form-section">
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox" 
+            id="aceptarTerminos" 
+            formControlName="aceptarTerminos"
+          >
+          <span>Acepto los términos y condiciones *</span>
+        </label>
+        @if (isFieldValid('aceptarTerminos')) {
+          <div class="error-message">
+            <span>{{ getErrorMessage('aceptarTerminos') }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox" 
+            id="newsletter" 
+            formControlName="newsletter"
+          >
+          <span>Quiero recibir el newsletter</span>
+        </label>
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="reservaFormGroup.invalid">Completar Reserva</button>
+      <button type="button" (click)="onReset()">Limpiar</button>
+    </div>
+
+  </form>
+
+  @if (reservaFormGroup.valid) {
+    <div class="form-status success">
+      ✓ Formulario válido - Listo para reservar
+    </div>
+  }
+</div>
