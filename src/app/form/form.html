@@ -9,13 +9,7 @@
       
       <div class="form-group">
         <label for="nombrecompleto">Nombre Completo</label>
-        <input 
-          type="text" 
-          id="nombrecompleto" 
-          formControlName="nombrecompleto"
-          [class.error]="isFieldValid('nombrecompleto')"
-          [class.valid]="isFieldValidAndTouched('nombrecompleto')"
-        >
+        <input type="text" id="nombrecompleto" formControlName="nombrecompleto" [class.error]="isFieldValid('nombrecompleto')" [class.valid]="isFieldValidAndTouched('nombrecompleto')">
         @if (isFieldValid('nombrecompleto')) {
           <div class="error-message">
             <span>{{ getErrorMessage('nombrecompleto') }}</span>
@@ -25,14 +19,7 @@
 
       <div class="form-group">
         <label for="dni">DNI/NIE</label>
-        <input 
-          type="text" 
-          id="dni" 
-          formControlName="dni"
-          placeholder="12345678A o X1234567A"
-          [class.error]="isFieldValid('dni')"
-          [class.valid]="isFieldValidAndTouched('dni')"
-        >
+        <input type="text" id="dni" formControlName="dni" placeholder="12345678A o X1234567A" [class.error]="isFieldValid('dni')" [class.valid]="isFieldValidAndTouched('dni')">
         @if (isFieldValid('dni')) {
           <div class="error-message">
             <span>{{ getErrorMessage('dni') }}</span>
@@ -42,30 +29,21 @@
 
       <div class="form-group">
         <label for="email">Email</label>
-        <input 
-          type="email" 
-          id="email" 
-          formControlName="email"
-          [class.error]="isFieldValid('email')"
-          [class.valid]="isFieldValidAndTouched('email')"
-        >
+        <input type="email" id="email" formControlName="email" [class.error]="isFieldValid('email') || correoExistente(reservaFormGroup.get('email')?.value)" [class.valid]="isFieldValidAndTouched('email') && !correoExistente(reservaFormGroup.get('email')?.value)">
         @if (isFieldValid('email')) {
           <div class="error-message">
             <span>{{ getErrorMessage('email') }}</span>
+          </div>
+        } @else if (correoExistente(reservaFormGroup.get('email')?.value)) {
+          <div class="error-message">
+            <span>El correo ya está registrado</span>
           </div>
         }
       </div>
 
       <div class="form-group">
         <label for="telefono">Teléfono</label>
-        <input 
-          type="tel" 
-          id="telefono" 
-          formControlName="telefono"
-          placeholder="612345678, tiene que empezar por 6,7 o 9"
-          [class.error]="isFieldValid('telefono')"
-          [class.valid]="isFieldValidAndTouched('telefono')"
-        >
+        <input type="tel" id="telefono" formControlName="telefono" placeholder="612345678, tiene que empezar por 6,7 o 9" [class.error]="isFieldValid('telefono')" [class.valid]="isFieldValidAndTouched('telefono')">
         @if (isFieldValid('telefono')) {
           <div class="error-message">
             <span>{{ getErrorMessage('telefono') }}</span>
@@ -75,13 +53,7 @@
 
       <div class="form-group">
         <label for="fnacimiento">Fecha de Nacimiento</label>
-        <input 
-          type="date" 
-          id="fnacimiento" 
-          formControlName="fnacimiento"
-          [class.error]="isFieldValid('fnacimiento')"
-          [class.valid]="isFieldValidAndTouched('fnacimiento')"
-        >
+        <input type="date" id="fnacimiento" formControlName="fnacimiento" [class.error]="isFieldValid('fnacimiento')" [class.valid]="isFieldValidAndTouched('fnacimiento')">
         @if (isFieldValid('fnacimiento')) {
           <div class="error-message">
             <span>{{ getErrorMessage('fnacimiento') }}</span>
@@ -96,12 +68,12 @@
       
       <div class="form-group">
         <label for="searchDestino">Buscar Destino</label>
-        <input 
-          type="text" 
-          id="searchDestino" 
-          [formControl]="searchControl"
-          placeholder="Escribe para buscar..."
-        >
+        <input type="text" id="searchDestino" [formControl]="searchControl" [class.error]="noResults" [class.valid]="filteredDestinos.length > 0" placeholder="Escribe para buscar...">
+        @if (noResults) {
+          <div class="error-message">
+            <span>No se han encontrado resultados</span>
+          </div>
+        }
       </div>
 
       <div class="form-group">
@@ -126,13 +98,7 @@
 
       <div class="form-group">
         <label for="fechaSalida">Fecha de Salida</label>
-        <input 
-          type="date" 
-          id="fechaSalida" 
-          formControlName="fechaSalida"
-          [class.error]="isFieldValid('fechaSalida')"
-          [class.valid]="isFieldValidAndTouched('fechaSalida')"
-        >
+        <input type="date" id="fechaSalida" formControlName="fechaSalida" [class.error]="isFieldValid('fechaSalida')" [class.valid]="isFieldValidAndTouched('fechaSalida')">
         @if (isFieldValid('fechaSalida')) {
           <div class="error-message">
             <span>{{ getErrorMessage('fechaSalida') }}</span>
@@ -142,13 +108,7 @@
 
       <div class="form-group">
         <label for="fechaRegreso">Fecha de Regreso</label>
-        <input 
-          type="date" 
-          id="fechaRegreso" 
-          formControlName="fechaRegreso"
-          [class.error]="isFieldValid('fechaRegreso')"
-          [class.valid]="isFieldValidAndTouched('fechaRegreso')"
-        >
+        <input type="date" id="fechaRegreso" formControlName="fechaRegreso" [class.error]="isFieldValid('fechaRegreso')" [class.valid]="isFieldValidAndTouched('fechaRegreso')">
         @if (isFieldValid('fechaRegreso')) {
           <div class="error-message">
             <span>{{ getErrorMessage('fechaRegreso') }}</span>
@@ -160,19 +120,11 @@
         <label>Tipo de Viaje</label>
         <div class="radio-group">
           <label class="radio-label">
-            <input 
-              type="radio" 
-              formControlName="tipoViaje"
-              value="Solo ida"
-            >
+            <input type="radio" formControlName="tipoViaje" value="Solo ida">
             <span>Solo ida</span>
           </label>
           <label class="radio-label">
-            <input 
-              type="radio" 
-              formControlName="tipoViaje"
-              value="Ida y vuelta"
-            >
+            <input type="radio" formControlName="tipoViaje" value="Ida y vuelta">
             <span>Ida y vuelta</span>
           </label>
         </div>
@@ -205,15 +157,7 @@
 
       <div class="form-group">
         <label for="numeroPersonas">Número de Personas</label>
-        <input 
-          type="number" 
-          id="numeroPersonas" 
-          formControlName="numeroPersonas"
-          min="1"
-          max="10"
-          [class.error]="isFieldValid('numeroPersonas')"
-          [class.valid]="isFieldValidAndTouched('numeroPersonas')"
-        >
+        <input type="number" id="numeroPersonas" formControlName="numeroPersonas" min="1" max="10" [class.error]="isFieldValid('numeroPersonas')" [class.valid]="isFieldValidAndTouched('numeroPersonas')">
         @if (isFieldValid('numeroPersonas')) {
           <div class="error-message">
             <span>{{ getErrorMessage('numeroPersonas') }}</span>
@@ -221,15 +165,55 @@
         }
       </div>
     </section>
-    
+
+    <!-- Sección de Datos de Pasajeros -->
+     @if (reservaFormGroup.get('numeroPersonas')?.valid) {
+    <section class="form-section" formArrayName="pasajeros">
+      <h2>Datos de los Pasajeros</h2>
+      
+      @for (pasajero of pasajeros.controls; track $index; let i = $index) {
+        <div [formGroupName]="i" class="pasajero-group">
+          <h3>Pasajero {{ i + 1 }}</h3>
+          
+          <div class="form-group">
+            <label [for]="'nombrepasajero' + i">Nombre Completo</label>
+            <input type="text" [id]="'nombrepasajero' + i" formControlName="nombrepasajero" [class.error]="pasajeros.at(i).get('nombrepasajero')?.invalid && pasajeros.at(i).get('nombrepasajero')?.touched" [class.valid]="pasajeros.at(i).get('nombrepasajero')?.valid && pasajeros.at(i).get('nombrepasajero')?.touched">
+            @if (pasajeros.at(i).get('nombrepasajero')?.invalid && pasajeros.at(i).get('nombrepasajero')?.touched) {
+              <div class="error-message">
+                <span>Este campo es obligatorio</span>
+              </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label [for]="'edadpasajero' + i">Edad</label>
+            <input type="number" [id]="'edadpasajero' + i" formControlName="edadpasajero" min="1" [class.error]="pasajeros.at(i).get('edadpasajero')?.invalid && pasajeros.at(i).get('edadpasajero')?.touched" [class.valid]="pasajeros.at(i).get('edadpasajero')?.valid && pasajeros.at(i).get('edadpasajero')?.touched">
+            @if (pasajeros.at(i).get('edadpasajero')?.invalid && pasajeros.at(i).get('edadpasajero')?.touched) {
+              <div class="error-message">
+                <span>Este campo es obligatorio</span>
+              </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label [for]="'relacionTitular' + i">Relación con el Titular</label>
+            <input type="text" [id]="'relacionTitular' + i" formControlName="relacionTitular" placeholder="Ej: Cónyuge, Hijo/a, Amigo/a" [class.error]="pasajeros.at(i).get('relacionTitular')?.invalid && pasajeros.at(i).get('relacionTitular')?.touched" [class.valid]="pasajeros.at(i).get('relacionTitular')?.valid && pasajeros.at(i).get('relacionTitular')?.touched">
+            @if (pasajeros.at(i).get('relacionTitular')?.invalid && pasajeros.at(i).get('relacionTitular')?.touched) {
+              <div class="error-message">
+                <span>Este campo es obligatorio</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  } @else {
+
+  }
     <section class="form-section">
       <div class="form-group checkbox-group">
         <label class="checkbox-label">
-          <input 
-            type="checkbox" 
-            id="aceptarTerminos" 
-            formControlName="aceptarTerminos"
-          >
+          <input type="checkbox" id="aceptarTerminos" formControlName="aceptarTerminos">
           <span>Acepto los términos y condiciones *</span>
         </label>
         @if (isFieldValid('aceptarTerminos')) {
@@ -241,11 +225,7 @@
 
       <div class="form-group checkbox-group">
         <label class="checkbox-label">
-          <input 
-            type="checkbox" 
-            id="newsletter" 
-            formControlName="newsletter"
-          >
+          <input type="checkbox" id="newsletter" formControlName="newsletter">
           <span>Quiero recibir el newsletter</span>
         </label>
       </div>
@@ -257,6 +237,8 @@
     </div>
 
   </form>
+
+
 
   @if (reservaFormGroup.valid) {
     <div class="form-status success">

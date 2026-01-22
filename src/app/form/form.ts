@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-form',
@@ -11,15 +11,18 @@ export class Form {
   constructor(private fb: FormBuilder) {
     this.createForm();
     this.setupSearch();
+    this.setupPassengerSync();
   }
   
   // Datos para los select
   destinos = ['Barcelona', 'Madrid', 'Valencia', 'Sevilla', 'Bilbao', 'Mallorca'];
   clases = ['Turista', 'Business', 'Primera classe'];
+  // datos para la simulacion de correo existente
+  correos = ['test@test.com', 'reserva@viajes.com', 'admin@travel.com'];
 
   searchControl: FormControl = new FormControl('');
   filteredDestinos: string[] = [...this.destinos];
-
+  noResults = false;
 
   reservaFormGroup!: FormGroup;
   //funcion para crear formcontrols
@@ -32,16 +35,64 @@ export class Form {
     fnacimiento: ['', [Validators.required, this.edadValidator]],
     aceptarTerminos: [false, [Validators.requiredTrue]],
     newsletter: [false],
-    
+  
     // Campos de información del viaje
     destino: ['', Validators.required],
     fechaSalida: ['', [Validators.required, this.fechaSalidaPosteriorAHoy]],
-    fechaRegreso: ['', Validators.required],
+    fechaRegreso: [''],
     tipoViaje: ['Solo ida', Validators.required],
     clase: ['', Validators.required],
-    numeroPersonas: [1, [Validators.required, Validators.min(1), Validators.max(10)]],
+    numeroPersonas: [0, [Validators.required, Validators.min(1), Validators.max(10)]],
+    pasajeros: this.fb.array([]),
+    }, { 
+      validators: this.fechaRegreso  //validador cruzado se tiene que declarar aqui
     });
   }
+  //funcion para configurar el numero de personas y suscribirse para ajustar pasajeros
+  setupPassengerSync(){
+    this.reservaFormGroup.get('numeroPersonas')?.valueChanges.subscribe(num => {
+      this.adjustPassengers(num);
+    });
+  }
+
+  //ajustar el numero de pasejeros dependiendo si añade o quita
+  adjustPassengers(num: number) {
+    const pasajerosArray = this.pasajeros;
+    const currentLength = pasajerosArray.length;
+    
+    if (num > currentLength) {
+      // Añadir más pasajeros
+      for (let i = currentLength; i < num; i++) {
+        this.addPasajero();
+      }
+    } else if (num < currentLength) {
+      // Eliminar pasajeros
+      for (let i = currentLength - 1; i >= num; i--) {
+        pasajerosArray.removeAt(i);
+      }
+    }
+  }
+
+  get pasajeros(): FormArray {
+    return this.reservaFormGroup.get('pasajeros') as FormArray;
+  }
+  
+  // añadir pasajero
+  addPasajero() {
+    const pasajeroGroup = this.fb.group({
+      nombrepasajero:['', [Validators.required, Validators.minLength(3), Validators.pattern(this.nameRegex)]],
+      edadpasajero: ['', [Validators.required, Validators.min(1)]],
+      relacionTitular: ['', Validators.required],
+    });
+    this.pasajeros.push(pasajeroGroup); //añade este nuevo pasajero al FormArray.
+    //Esto hace que automáticamente aparezca un nuevo input en la UI para que el usuario pueda escribir el nombre del pasajero
+  }
+
+  // ELIMINAR UN PASAJERO
+  removePasajero(index: number) {
+    this.pasajeros.removeAt(index);
+  }
+
 
   // CONFIGURAR EL FILTRE
   setupSearch() {
@@ -50,14 +101,16 @@ export class Form {
     });
   }
 
-  // FILTRAR PAÏSOS
+  // FILTRAR paises 
   filterCountries(searchTerm: string) {
     if (!searchTerm) {
       this.filteredDestinos = [...this.destinos];
+      this.noResults = false;
     } else {
       this.filteredDestinos = this.destinos.filter(destino =>
         destino.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      this.noResults = this.filteredDestinos.length === 0;
     }
   }
 
@@ -95,6 +148,7 @@ export class Form {
     if (errors['invalidDni']) return errors['invalidDni'];
     if (errors['invalidAge']) return errors['invalidAge'];
     if (errors['invalidFechaSalida']) return errors['invalidFechaSalida'];
+    if (errors['invalidFechaRegreso']) return errors['invalidFechaRegreso'];
     if (errors['min']) return `El valor mínimo es ${errors['min'].min}`;
     if (errors['max']) return `El valor máximo es ${errors['max'].max}`;
     if (errors['minlength']) return `La longitud mínima es ${errors['minlength'].requiredLength} caracteres`;
@@ -133,6 +187,7 @@ export class Form {
     return null;
   }
 
+  //calcula la edad en base a la fecha de nacimiento y la de hoy
   edadValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     if (!value) return null;
@@ -148,7 +203,7 @@ export class Form {
     }
     return null;
   }
-
+  //mira si la fecha de salida es posterior a hoy
   fechaSalidaPosteriorAHoy(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     if (!value) return null;
@@ -158,6 +213,39 @@ export class Form {
       return { invalidFechaSalida: 'La fecha de salida debe ser posterior a hoy' };
     }
     return null;
+  }
+
+  
+  fechaRegreso(control: AbstractControl): ValidationErrors | null {
+    const fechaSalida = control.get('fechaSalida');
+    const fechaRegreso = control.get('fechaRegreso');
+
+    if (!fechaSalida || !fechaRegreso) return null; // en caso de que los controladores devuelve que no hay error
+
+    const fechaSalidaValue = fechaSalida.value;
+    const fechaRegresoValue = fechaRegreso.value;
+
+    if (!fechaSalidaValue || !fechaRegresoValue) return null; // si no hay valor no hay erorres
+
+    const fechaSalidaDate = new Date(fechaSalidaValue);
+    const fechaRegresoDate = new Date(fechaRegresoValue);
+
+    if (fechaRegresoDate <= fechaSalidaDate) {
+      fechaRegreso.setErrors({ invalidFechaRegreso: 'La fecha de regreso debe ser posterior a la fecha de salida' });
+      return { invalidFechaRegreso: true };
+    } else {
+      const errors = fechaRegreso.errors;
+      if (errors) {
+        delete errors['invalidFechaRegreso'];
+        fechaRegreso.setErrors(Object.keys(errors).length ? errors : null);
+      }
+    }
+
+    return null;
+  }
+
+  correoExistente(email: string): boolean {
+    return this.correos.includes(email);
   }
 
 
