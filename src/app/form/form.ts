@@ -12,6 +12,7 @@ export class Form {
     this.createForm();
     this.setupSearch();
     this.setupPassengerSync();
+    this.setupPriceCalculation();
   }
   
   // Datos para los select
@@ -23,6 +24,7 @@ export class Form {
   searchControl: FormControl = new FormControl('');
   filteredDestinos: string[] = [...this.destinos];
   noResults = false;
+  precioTotal = 0;
 
   reservaFormGroup!: FormGroup;
   //funcion para crear formcontrols
@@ -248,6 +250,36 @@ export class Form {
     return this.correos.includes(email);
   }
 
+  // Configurar cálculo de precio en tiempo real
+  setupPriceCalculation() {
+    this.reservaFormGroup.get('clase')?.valueChanges.subscribe(() => {
+      this.calcularPrecioTotal();
+    });
+    
+    this.reservaFormGroup.get('numeroPersonas')?.valueChanges.subscribe(() => {
+      this.calcularPrecioTotal();
+    });
+  }
+
+  calcularPrecioTotal() {
+    const clase = this.reservaFormGroup.get('clase')?.value;
+    const numeroPersonas = this.reservaFormGroup.get('numeroPersonas')?.value || 0;
+    let precioPorPersona = 0;
+    switch (clase) {
+      case 'Turista':
+        precioPorPersona = 100;
+        break;
+      case 'Business':
+        precioPorPersona = 200;
+        break;
+      case 'Primera classe':
+        precioPorPersona = 300;
+        break;
+      default:
+        precioPorPersona = 0;
+    }
+    this.precioTotal = precioPorPersona * numeroPersonas;
+  }
 
 
   onSubmit() {

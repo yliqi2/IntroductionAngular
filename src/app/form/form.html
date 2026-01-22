@@ -167,7 +167,11 @@
     </section>
 
     <!-- Sección de Datos de Pasajeros -->
-     @if (reservaFormGroup.get('numeroPersonas')?.valid) {
+    @if ((reservaFormGroup.get('numeroPersonas')?.valid) && (reservaFormGroup.get('clase')?.valid)){
+    <section class="form-section">
+      <h2>Precio Total: {{ precioTotal }} €</h2>
+    </section>
+
     <section class="form-section" formArrayName="pasajeros">
       <h2>Datos de los Pasajeros</h2>
       
