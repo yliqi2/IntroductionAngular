@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-form',
@@ -34,7 +34,7 @@ export class Form {
     dni: ['', [Validators.required, this.dniValidator]],
     email: ['', [Validators.required, Validators.email]],
     telefono: ['', [Validators.required, Validators.pattern(this.phoneRegex)]],
-    fnacimiento: ['', [Validators.required, this.edadValidator]],
+    fnacimiento: ['', [Validators.required, this.minimumAgeValidator(18)]],
     aceptarTerminos: [false, [Validators.requiredTrue]],
     newsletter: [false],
   
@@ -148,7 +148,7 @@ export class Form {
     if (errors['requiredTrue']) return 'Debes aceptar los términos y condiciones';
     if (errors['email']) return 'Formato de email inválido';
     if (errors['invalidDni']) return errors['invalidDni'];
-    if (errors['invalidAge']) return errors['invalidAge'];
+    if (errors['minimumAge']) return errors['minimumAge'];
     if (errors['invalidFechaSalida']) return errors['invalidFechaSalida'];
     if (errors['invalidFechaRegreso']) return errors['invalidFechaRegreso'];
     if (errors['min']) return `El valor mínimo es ${errors['min'].min}`;
@@ -189,21 +189,30 @@ export class Form {
     return null;
   }
 
-  //calcula la edad en base a la fecha de nacimiento y la de hoy
-  edadValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (!value) return null;
-    const fechaNacimiento = new Date(value);
-    const hoy = new Date();
-    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-    const mes = hoy.getMonth() - fechaNacimiento.getMonth();
-    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
-      edad--;
-    }
-    if (edad < 18) {
-      return { invalidAge: 'Debes ser mayor de 18 años' };
-    }
-    return null;
+  // VALIDADOR AMB PARÀMETRE - Retorna ValidatorFn
+  minimumAgeValidator(minAge: number): ValidatorFn {
+    // Aquesta funció retorna el validador real
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) return null;
+
+      const birthDate = new Date(value);
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      // Ajustar si encara no ha fet aniversari aquest any
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      if (age < minAge) {
+        return { minimumAge: `Has de tenir almenys ${minAge} anys` };
+      }
+
+      return null;
+    };
   }
   //mira si la fecha de salida es posterior a hoy
   fechaSalidaPosteriorAHoy(control: AbstractControl): ValidationErrors | null {
@@ -221,7 +230,7 @@ export class Form {
   fechaRegreso(control: AbstractControl): ValidationErrors | null {
     const fechaSalida = control.get('fechaSalida');
     const fechaRegreso = control.get('fechaRegreso');
-
+    
     if (!fechaSalida || !fechaRegreso) return null; // en caso de que los controladores devuelve que no hay error
 
     const fechaSalidaValue = fechaSalida.value;
@@ -245,7 +254,7 @@ export class Form {
 
     return null;
   }
-
+// el validador fn 
   correoExistente(email: string): boolean {
     return this.correos.includes(email);
   }
